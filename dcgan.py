@@ -23,6 +23,7 @@ print(tf.__version__)
 os.environ["CUDA_VISIBLE_DEVICES"]="0" #使用第0个gpu
 import tensorflow.compat.v1 as tf #使用1.0版本的方法
 tf.disable_v2_behavior() #禁用2.0版本的方法
+print('this is the first version of my github')
 #%% 数据预处理
 
 # data_root=Path('xxx') # 创建文件对象
