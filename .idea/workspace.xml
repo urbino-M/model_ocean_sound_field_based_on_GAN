@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="76e9f3dc-4820-49b5-9983-4d4d97225bcd" name="默认变更列表" comment="Merge remote-tracking branch 'origin/main' into main&#10;&#10;# Conflicts:&#10;#&#9;.gitignore">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dcgan.py" beforeDir="false" afterPath="$PROJECT_DIR$/dcgan.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,6 +33,11 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Urbino\0master\0毕设\git-manager\model_ocean_sound_field_based_on_GAN\data" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
@@ -93,6 +99,7 @@
       <option name="presentableId" value="Default" />
       <updated>1655436263551</updated>
       <workItem from="1655436265501" duration="7351000" />
+      <workItem from="1655456510301" duration="2862000" />
     </task>
     <task id="LOCAL-00001" summary="v1">
       <created>1655436990376</created>
@@ -182,7 +189,18 @@
     <MESSAGE value="Merge remote-tracking branch 'origin/main' into main&#10;&#10;# Conflicts:&#10;#&#9;.gitignore" />
     <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'origin/main' into main&#10;&#10;# Conflicts:&#10;#&#9;.gitignore" />
   </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dcgan.py</url>
+          <line>270</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/model_ocean_sound_field_based_on_GAN$dcgan.coverage" NAME="dcgan 覆盖结果" MODIFIED="1655436653465" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/model_ocean_sound_field_based_on_GAN$dcgan.coverage" NAME="dcgan 覆盖结果" MODIFIED="1655459428508" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
