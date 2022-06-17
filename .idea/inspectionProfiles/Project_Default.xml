@@ -1,0 +1,33 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="3">
+            <item index="0" class="java.lang.String" itemvalue="pandas" />
+            <item index="1" class="java.lang.String" itemvalue="qt_material" />
+            <item index="2" class="java.lang.String" itemvalue="opencv_python" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="W605" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="tensorflow_core.python.keras.api._v2.keras.callbacks.ReduceLROnPlateau" />
+          <option value="matplotlib.cm.Blues" />
+          <option value="tensorflow_core._api.v2.config.list_physical_devices" />
+          <option value="tensorflow_core._api.v2.config.set_visible_devices" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
