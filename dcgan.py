@@ -101,12 +101,12 @@ class GAN():
         # self.optimizer = Adam(0.0001, 0.5)#优化器参数lr和beta
         #########D结构#############
         self.discriminator = self.build_discriminator()
-        self.discriminator_optimizer = Adam(0.0001, 0.5)
+        self.discriminator_optimizer = tf.train.AdamOptimizer(2e-4, beta1=0.5)
         # self.discriminator.compile(loss='binary_crossentropy', optimizer=self.optimizer,
         #                            metrics=['accuracy'])#判别器构造
         #########G结构#############
         self.generator = self.build_generator()
-        self.generator_optimizer = Adam(0.0001, 0.5)
+        self.generator_optimizer = tf.train.AdamOptimizer(2e-4, beta1=0.5)
         z = Input(shape=(self.latent_dim,)) # 定义一个输入层，输入维度是噪声的维度
         data = self.generator(z)#给G输入噪声,data是G的输出
         self.discriminator.trainable = False #为了组合模型（此时组合的模型是G+D只训练G）
@@ -244,10 +244,14 @@ class GAN():
         # gen_loss = rfd.cal_RFD(gen_impulse_response,signal_impulse_response)
 
         # GAN loss
-        gen_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.discriminator.predict(gen_datas)),
-                                                            logits=self.discriminator.predict(gen_datas))
-        gen_loss = tf.keras.losses.SparseCategoricalCrossentropy(tf.ones_like(self.discriminator.predict(gen_datas),
-                                                                              self.discriminator.predict(gen_datas)))
+        # gen_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.discriminator.predict(gen_datas)),
+        #                                                     logits=self.discriminator.predict(gen_datas))
+        loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        #接受模型的类别概率预测结果和预期标签，然后返回样本的平均损失。
+        gen_loss = loss_object(tf.ones_like(self.discriminator.predict(gen_datas)),
+                                            self.discriminator.predict(gen_datas))
+        # gen_loss = tf.keras.losses.SparseCategoricalCrossentropy(tf.ones_like(self.discriminator.predict(gen_datas),
+        #                                                                       self.discriminator.predict(gen_datas)))
         # l2_loss = tf.reduce_mean(tf.abs(target - gen_output))
         # total_gen_loss = tf.reduce_mean(gen_loss) + l2_weight * l2_loss
         return gen_loss
@@ -262,8 +266,8 @@ class GAN():
         generator_gradient = gen_tape.gradient(gen_loss, self.generator.trainable_weights)
         discriminator_gradient = disc_tape.gradient(disc_loss, self.discriminator.trainable_weights)
         # apply gradient
-        generator_optimizer.apply_gradients(zip(generator_gradient, self.generator.trainable_weights))
-        discriminator_optimizer.apply_gradients(zip(discriminator_gradient, self.discriminator.trainable_weights))
+        self.generator_optimizer.apply_gradients(zip(generator_gradient, self.generator.trainable_weights))
+        self.discriminator_optimizer.apply_gradients(zip(discriminator_gradient, self.discriminator.trainable_weights))
         return gen_loss, disc_loss
 
 
