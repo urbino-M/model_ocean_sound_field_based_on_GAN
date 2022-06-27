@@ -27,7 +27,7 @@ print(tf.__version__)
 # print(tf.test.is_gpu_available())#测试GPU是否可用
 # physical_devices = tf.config.experimental.list_physical_devices('GPU') #列出GPU的信息
 # tf.config.experimental.set_memory_growth(physical_devices[0], True)
-# os.environ["CUDA_VISIBLE_DEVICES"]="0" #使用第0个gpu
+os.environ["CUDA_VISIBLE_DEVICES"]="1" #使用第0个gpu
 import tensorflow.compat.v1 as tf #使用1.0版本的方法
 tf.disable_v2_behavior() #禁用2.0版本的方法
 print('this is the first version of my github')
@@ -40,7 +40,6 @@ tf.executing_eagerly()
 # config.gpu_options.per_process_gpu_memory_fraction = 0.9
 # # #指定显存分配比例
 #%% 数据预处理
-
 # data_root=Path('xxx') # 创建文件对象
 # all_data_path=[str(item) for item in data_root.iterdir()] #将文件夹中的所有数据名称转化为字符串
 # data_ds=[np.loadtxt(item) for item in all_data_path] #导入上述字符串所对应的txt or mat or sth
@@ -53,6 +52,7 @@ sig_src = sig_src.T
 # sig_src = sig_src.reshape(sig_src.shape[0],sig_src.shape[1],1)
 
 ####################### 读取构造的0.1s接收信号（发射信号经过真实信道后加4-8dB的高斯白噪声扩充）*600 #############################
+
 data_init = h5py.File('data/enhance_true_sig2_2_real.mat',mode='r')
 data_ds = data_init['enhance_true_sig2_2_real']
 # print(data_init.values())
