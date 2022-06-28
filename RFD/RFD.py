@@ -56,7 +56,7 @@ class RFD():
                 if left_boundary < 1:
                     left_boundary = 1
                 if right_boundary > data_standard.shape[1]:
-                    right_boundary = data_standard.shape[1]
+                    right_boundary = data_standard.shape[1]-1
                 mid_index = np.array(range(left_boundary,right_boundary+1))
                 index_all = np.append(index_all,mid_index)
             index_all = np.unique(index_all)

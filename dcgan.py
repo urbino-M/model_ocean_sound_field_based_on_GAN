@@ -231,34 +231,37 @@ class GAN:
         """
         # real_datas = real_datas.reshape(real_datas.shape[0],real_datas.shape[1],1)
 
-        loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        # loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
         #接受模型的类别概率预测结果和预期标签，然后返回样本的平均损失。
-        real_loss = loss_object(tf.ones_like(self.discriminator.predict(gen_datas)),
-                                self.discriminator.predict(gen_datas))
-        generated_loss = loss_object(tf.zeros_like(self.discriminator.predict(real_datas)),
-                                     self.discriminator.predict(real_datas))
+        gen_disc_output = self.discriminator(tf.constant(gen_datas,dtype=tf.float32))
+        real_disc_output = self.discriminator(tf.constant(real_datas,dtype=tf.float32))
+        generated_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(gen_disc_output),
+                                                                 logits = gen_disc_output)
+        real_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(real_disc_output),
+                                                            logits=real_disc_output)
         total_disc_loss = tf.reduce_mean(real_loss)+tf.reduce_mean(generated_loss)
         return total_disc_loss
 
     def generator_loss(self,gen_datas,constructed_signal_channel_estimation,rfd_weight):
         gen_datas = gen_datas.T
+        gen_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.discriminator(tf.constant(gen_datas))),
+                                                           logits = self.discriminator(tf.constant(gen_datas)))
         Enhanced_impulse_response = self.OMP.perform_omp(s=sig_src,data=gen_datas)#sig_src是发射信号
         gen_rfd_loss = self.rfd.cal_RFD(data_standard=constructed_signal_channel_estimation,
                                      data_other=Enhanced_impulse_response,
                                      dist0=15)
-        total_gen_loss = gen_rfd_loss + rfd_weight*gen_rfd_loss
-
+        total_gen_loss = gen_loss + rfd_weight*gen_rfd_loss
         return total_gen_loss
 
     def train_step(self):
         with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
             gen_datas = self.generator.predict(noise[self.idx])
+            disc_loss = self.discriminator_loss(gen_datas=gen_datas,
+                                                real_datas=data_ds[self.idx])  # disc loss
             gen_loss = self.generator_loss(gen_datas=gen_datas,
                                            constructed_signal_channel_estimation=constructed_signal_channel_estimation,
                                            rfd_weight=0.1)   # gen loss
-            gen_loss = tf.constant(gen_loss)
-            disc_loss = self.discriminator_loss(gen_datas=gen_datas,
-                                                real_datas=data_ds[self.idx])  # disc loss
+            # gen_loss = tf.constant(gen_loss)
             # disc_loss = tf.constant(disc_loss)
         # gradient
         generator_gradient = gen_tape.gradient(gen_loss, self.generator.trainable_weights)
@@ -273,8 +276,8 @@ class GAN:
         for epoch in range(epochs):
             self.idx = np.random.randint(0, data.shape[0], batch_size)#随机产生batch_size个索引
             #data.shape[0]为数据集样本的数量，随机生成batch_size个数量的随机数，作为数据的索引
-            gen_datas = self.generator.predict(noise[self.idx]) #生成器预测噪声
-            gen_loss, disc_loss = self.train_step()#计算损失
+            gen_datas = self.generator.predict(noise[self.idx]) #生成器预测噪声..
+            gen_loss, disc_loss = self.train_step()#计算损失,gradient,and refresh weight
             # validity= self.discriminator.predict(real_datas)#disc_real_output
             # disc_generated_output = self.discriminator.predict(gen_datas)
 
