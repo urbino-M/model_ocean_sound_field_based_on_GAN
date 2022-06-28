@@ -19,7 +19,7 @@ from RFD.RFD import RFD  # 导入局部聚焦误差函数
 os.environ["CUDA_VISIBLE_DEVICES"]="1" #使用第0个gpu
 import tensorflow.compat.v1 as tf #使用1.0版本的方法
 tf.disable_v2_behavior() #禁用2.0版本的方法
-print('this is the first version of my github')
+print('this is the newloss version of my github')
 tf.executing_eagerly()
 # config = tf.compat.v1.ConfigProto()
 # config.gpu_options.allow_growth = True
