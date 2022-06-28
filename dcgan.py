@@ -1,29 +1,18 @@
 #%% 选择GPU
-import os
-import tensorflow as tf
-import numpy as np
-import pandas as pd
-import scipy.io as sio
-from scipy.io import loadmat
-from scipy import signal
-from scipy.signal import savgol_filter, spectrogram
-import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-import math
-import h5py
 import datetime
-import sys
-from pathlib import Path
-from RFD.RFD import RFD #导入局部聚焦误差函数
-from OMP.OMP import OMP
-import keras
+import os
+import h5py
+import numpy as np
+import scipy.io as sio
+# import tensorflow as tf
+from keras.layers import BatchNormalization
 from keras.layers import Input, Dense, Reshape, Flatten, Dropout
-from keras.layers import BatchNormalization, Activation, ZeroPadding2D
 from keras.layers.advanced_activations import LeakyReLU
 from keras.layers.convolutional import UpSampling1D, Conv1D
 from keras.models import Sequential, Model
-from keras.optimizers import Adam
-print(tf.__version__)
+from OMP.OMP import OMP
+from RFD.RFD import RFD  # 导入局部聚焦误差函数
+# print(tf.__version__)
 # print(tf.test.is_gpu_available())#测试GPU是否可用
 # physical_devices = tf.config.experimental.list_physical_devices('GPU') #列出GPU的信息
 # tf.config.experimental.set_memory_growth(physical_devices[0], True)
@@ -80,8 +69,9 @@ sim_H = np.array(sim_H)
 sim_H = sim_H.T
 
 #######################读取真实信道（由1s 实验cw信号估计出来的信道）#######################################
-# Real_impulse_response_init =  h5py.File('./sig_src2.mat',mode='r')
-
+Real_impulse_response_init =  h5py.File('data/or2_c_final.mat',mode='r')
+Real_impulse_response = Real_impulse_response_init['or2_c_final']
+Real_impulse_response = np.array(Real_impulse_response)
 
 # data_ds=data_ds/np.max(data_ds)#数据归一化，可以换处理方法。
 # data_ds.shape
@@ -235,42 +225,41 @@ class GAN:
         validity = model(data) # 输出数据是D的判别结果
         return Model(data, validity) #返回模型
 
-    def discriminator_loss(self,gen_datas,constructed_signal_channel_estimation):
+    def discriminator_loss(self,gen_datas,real_datas): #sig_src是发射信号，signal
+        """
+        real_datas is real recieved signal i.e. data_ds
+        """
+        # real_datas = real_datas.reshape(real_datas.shape[0],real_datas.shape[1],1)
+
+        loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        #接受模型的类别概率预测结果和预期标签，然后返回样本的平均损失。
+        real_loss = loss_object(tf.ones_like(self.discriminator.predict(gen_datas)),
+                                self.discriminator.predict(gen_datas))
+        generated_loss = loss_object(tf.zeros_like(self.discriminator.predict(real_datas)),
+                                     self.discriminator.predict(real_datas))
+        total_disc_loss = tf.reduce_mean(real_loss)+tf.reduce_mean(generated_loss)
+        return total_disc_loss
+
+    def generator_loss(self,gen_datas,constructed_signal_channel_estimation,rfd_weight):
         gen_datas = gen_datas.T
         Enhanced_impulse_response = self.OMP.perform_omp(s=sig_src,data=gen_datas)#sig_src是发射信号
-        # Real_impulse_response = Hr[idx] #保证真正的冲击响应是对应的
-        disc_loss = self.rfd.cal_RFD(data_standard=constructed_signal_channel_estimation,
+        gen_rfd_loss = self.rfd.cal_RFD(data_standard=constructed_signal_channel_estimation,
                                      data_other=Enhanced_impulse_response,
                                      dist0=15)
-        return disc_loss
+        total_gen_loss = gen_rfd_loss + rfd_weight*gen_rfd_loss
 
-    def generator_loss(self,gen_datas,data): #sig_src是发射信号，signal
-        """
-        """
-        # gen_impulse_response = OMP.perform_omp(sig_src,noise[self.idx])
-        # gen_loss = rfd.cal_RFD(gen_impulse_response,signal_impulse_response)
+        return total_gen_loss
 
-        # GAN loss
-        # gen_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.discriminator.predict(gen_datas)),
-        #                                                     logits=self.discriminator.predict(gen_datas))
-        loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False)
-        #接受模型的类别概率预测结果和预期标签，然后返回样本的平均损失。
-        gen_loss = loss_object(tf.ones_like(self.discriminator.predict(gen_datas)),
-                                            self.discriminator.predict(gen_datas))
-
-
-        # gen_loss = tf.keras.losses.SparseCategoricalCrossentropy(tf.ones_like(self.discriminator.predict(gen_datas),
-        #                                                                       self.discriminator.predict(gen_datas)))
-        # l2_loss = tf.reduce_mean(tf.abs(target - gen_output))
-        # total_gen_loss = tf.reduce_mean(gen_loss) + l2_weight * l2_loss
-        return gen_loss
-
-    def train_step(self,noise,data,idx):
+    def train_step(self):
         with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
             gen_datas = self.generator.predict(noise[self.idx])
-            gen_loss = self.generator_loss(gen_datas=gen_datas,data=data)   # gen loss
-            disc_loss = self.discriminator_loss(gen_datas,constructed_signal_channel_estimation[self.idx] )  # disc loss
-            # disc_loss = tf.convert_to_tensor(disc_loss)
+            gen_loss = self.generator_loss(gen_datas=gen_datas,
+                                           constructed_signal_channel_estimation=constructed_signal_channel_estimation,
+                                           rfd_weight=0.1)   # gen loss
+            gen_loss = tf.constant(gen_loss)
+            disc_loss = self.discriminator_loss(gen_datas=gen_datas,
+                                                real_datas=data_ds[self.idx])  # disc loss
+            # disc_loss = tf.constant(disc_loss)
         # gradient
         generator_gradient = gen_tape.gradient(gen_loss, self.generator.trainable_weights)
         discriminator_gradient = disc_tape.gradient(disc_loss, self.discriminator.trainable_weights)
@@ -279,39 +268,22 @@ class GAN:
         self.discriminator_optimizer.apply_gradients(zip(discriminator_gradient, self.discriminator.trainable_weights))
         return gen_loss, disc_loss
 
-
     def train(self,data,noise,epochs,batch_size,sample_interval):
-
-        # valid_label = np.ones((batch_size, 1))#生成真值的标签
-        # fake_label = np.zeros((batch_size, 1))#生成假值的标签
         start_time = datetime.datetime.now()
         for epoch in range(epochs):
-            #data.shape[0]为数据集样本的数量，随机生成batch_size个数量的随机数，作为数据的索引
             self.idx = np.random.randint(0, data.shape[0], batch_size)#随机产生batch_size个索引
-            # real_datas = data[idx]#从数据集中随机挑选batch_size个数据作为一个批次训练
-            # noise = np.random.normal(0, 1, (batch_size, self.latent_dim)) #这里需要改成自己需要的数据,latent varible
-            # noise = noise[idx]#noise 需要转换成numpy array
+            #data.shape[0]为数据集样本的数量，随机生成batch_size个数量的随机数，作为数据的索引
             gen_datas = self.generator.predict(noise[self.idx]) #生成器预测噪声
-            # d_loss_real = self.discriminator.train_on_batch(real_datas, valid_label)#输入数据和标签，返回损失
-            # d_loss_fake = self.discriminator.train_on_batch(gen_datas, fake_label) #计算损失
-            # d_loss = 0.5 * np.add(d_loss_real, d_loss_fake) #D损失,真实损失和假的损失加和除以2
-            # # d_loss = np.array(d_loss, dtype=np.float32)
-            # g_loss = self.combined.train_on_batch(noise, valid_label) #G损失
-            gen_loss, disc_loss = self.train_step(noise,data,self.idx)
+            gen_loss, disc_loss = self.train_step()#计算损失
             # validity= self.discriminator.predict(real_datas)#disc_real_output
             # disc_generated_output = self.discriminator.predict(gen_datas)
 
             elapsed_time = datetime.datetime.now() - start_time
             if epoch % sample_interval == 0: #相除取余 (每一百个epoch打印一次verbose)
-                self.X1 = self.sample_data(epoch,idx=self.idx)
-                print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, disc_loss[0], 100 * disc_loss[1], gen_loss), 'time:',  elapsed_time)
-                #打印损失
-            # summary = sess.run(merged, feed_dict={D_Loss: d_loss, G_Loss: g_loss})
-            # writer.add_summary(summary, epoch)
-
-    def sample_data(self, epoch,idx): #每100个epoch保存数据
-        # noise = np.random.normal(0, 1, (1, self.latent_dim)) #生成一个服从正态分布的随机噪声，维度是(1,self.latent_dim)
-        # noise = noise[idx]
+                self.X1 = self.sample_data(epoch)
+                print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, disc_loss[0], 100 * disc_loss[1], gen_loss),
+                      'time:',  elapsed_time)
+    def sample_data(self, epoch): #每100个epoch保存数据
         gen_datas = self.generator.predict(noise[self.idx]) #生成的样本，即把随机噪声扔进去然后预测,这里需要重写,idx
         file_name='./gen_data/gen_datas.mat'.format(epoch)
         sio.savemat(file_name,{'gen_datas':gen_datas})

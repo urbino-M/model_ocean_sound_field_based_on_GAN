@@ -61,8 +61,8 @@ class RFD():
                 index_all = np.append(index_all,mid_index)
             index_all = np.unique(index_all)
             index_all = index_all.astype(int)
-            data_other = data_other.view('complex')
-            data_standard = data_standard.view('complex')
+            # data_other = data_other.view('complex')
+            # data_standard = data_standard.view('complex')
             fenzi = np.sum(abs(np.square(data_other[0,index_all])))
             fenmu = np.sum(abs(np.square(data_standard[0,index_all])))
             rfd_1=fenzi/fenmu
