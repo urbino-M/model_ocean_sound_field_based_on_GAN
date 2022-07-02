@@ -34,7 +34,7 @@ class RFD():
         fenzi = np.sum(abs(np.square(data_other[0,index_all])))#只跟第一个做误差分析
         fenmu = np.sum(abs(np.square(data_standard[0,index_all])))
         rfd=fenzi/fenmu
-        print(rfd)
+        print('this is the first rfd: '+str(rfd))
 
         #%% rfd 结果超过最大阈值进行间距调整
         deta = abs(rfd-1)
@@ -102,7 +102,6 @@ class RFD():
                 # if rfd_2 >threshold2:
                 deta2 = abs(rfd_2-1)
                     # break
-
                 dist0 = dist
 
         if flag1==1:
@@ -111,7 +110,7 @@ class RFD():
         elif flag2==1:
             if deta>deta2:
                 rfd = rfd_2
-        print(rfd)
+        print('this is a modified rfd: '+str(rfd))
         return rfd
 
 

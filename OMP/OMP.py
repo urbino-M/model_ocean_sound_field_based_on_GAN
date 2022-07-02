@@ -85,10 +85,11 @@ class OMP():
         Pos_theta = Pos_theta.astype(int)#作为索引,所以要转化成整形
         theta[Pos_theta] = theta_ls #恢复出的theta
         results = abs(theta)/max(abs(theta))
+        print('OMP finished')
         # plt.plot(results)
         # plt.show()
-        file_name='./gen_data/enhanced_H.mat'
-        sio.savemat(file_name,{'enhanced_H':results})
+        # file_name='./gen_data/enhanced_H.mat'#保存生成的增强信道
+        # sio.savemat(file_name,{'enhanced_H':results})
         return results
 
 #%%
