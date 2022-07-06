@@ -5,11 +5,11 @@ import h5py
 import numpy as np
 import scipy.io as sio
 import tensorflow as tf
-from keras.layers import BatchNormalization
-from keras.layers import Input, Dense, Reshape, Flatten, Dropout
-from keras.layers.advanced_activations import LeakyReLU
-from keras.layers.convolutional import UpSampling1D, Conv1D
-from keras.models import Sequential, Model
+# from keras.layers import BatchNormalization
+# from keras.layers import Input, Dense, Reshape, Flatten, Dropout
+# from keras.layers.advanced_activations import LeakyReLU
+# from keras.layers.convolutional import UpSampling1D, Conv1D
+# from keras.models import Sequential, Model
 from OMP.OMP import OMP
 from RFD.RFD import RFD  # 导入局部聚焦误差函数
 print(tf.__version__)
@@ -111,7 +111,7 @@ class GAN:
         #########G结构#############
         self.generator = self.build_generator()
         self.generator_optimizer = tf.keras.optimizers.Adam(2e-4,0.5)
-        z = Input(shape=(self.latent_dim,)) # 定义一个输入层，输入维度是噪声的维度
+        z = tf.keras.layers.Input(shape=(self.latent_dim,)) # 定义一个输入层，输入维度是噪声的维度
         data = self.generator(z)#给G输入噪声,data是G的输出
         self.discriminator.trainable = True #为了组合模型（此时组合的模型是G+D只训练G）
         self.generator.trainable = True
@@ -126,114 +126,44 @@ class GAN:
         # self.combined.summary()#打印组合的模型参数
 
     def build_generator(self):
-        model = Sequential() #根据数据复杂度修改该模型层数
-        #         model.add(Dense(256, input_dim=self.latent_dim))
-        #         model.add(LeakyReLU(alpha=0.2))
-        #         model.add(BatchNormalization(momentum=0.8))
-        #         model.add(Dense(512))
-        #         model.add(LeakyReLU(alpha=0.2))
-        #         model.add(BatchNormalization(momentum=0.8))
-        #         model.add(Dense(1024))
-        #         model.add(LeakyReLU(alpha=0.2))
-        #         model.add(BatchNormalization(momentum=0.8))
-        #         model.add(Dense(64, input_dim=self.latent_dim))
-        #         model.add(LeakyReLU(alpha=0.2))
-        #         model.add(BatchNormalization(momentum=0.8))
-        model.add(Dense(200,input_shape=(self.latent_dim,)))#200
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Dropout(0.5))
-        model.add(Reshape((200, 1)))
-        model.add(Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'))
-        model.add(UpSampling1D())#400
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(UpSampling1D())#800
-        model.add(Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Dropout(0.5))
-        # model.add(Conv1D(filters=64, kernel_size=3, padding="same", activation='relu'))
-        # model.add(BatchNormalization(momentum=0.8))
-        # model.add(Conv1D(filters=64, kernel_size=3, padding="same", activation='relu'))
-        # model.add(BatchNormalization(momentum=0.8))
-        # model.add(Conv1D(filters=64, kernel_size=3, padding="same", activation='relu'))
-        # model.add(BatchNormalization(momentum=0.8))
-        model.add(Dropout(0.5))
-        model.add(Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Dropout(0.5))
-        model.add(UpSampling1D())#1600
-        model.add(Dropout(0.5))
-        model.add(Conv1D(filters=6, kernel_size=8, padding="same", activation='relu'))#9600
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Dropout(0.5))
-        model.add(Flatten())
-        model.add(Dropout(0.5))
-        model.add(Reshape((SEQUNENCE_LENGTH,1)))
-        # model.add(Dense(np.prod(self.data_shape), activation='tanh'))
-        # model.add(Reshape(self.data_shape))
-        # model.summary()
+        model = tf.keras.Sequential([
+            tf.keras.layers.Dense(200,input_shape=(self.latent_dim,)),
+            tf.keras.layers.LeakyReLU(alpha=0.2),
+            tf.keras.layers.Reshape((200,1)),
+            tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            tf.keras.layers.UpSampling1D(),
+            tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            tf.keras.layers.UpSampling1D(),
+            tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            tf.keras.layers.UpSampling1D(),
+            tf.keras.layers.Conv1D(filters=6, kernel_size=8, padding="same", activation='relu'),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Reshape((SEQUNENCE_LENGTH,1))
+
+        ]) #根据数据复杂度修改该模型层数
         return model
-        # noise = Input(shape=(self.latent_dim,))#构建输入层，输入层输入的是noise
-        # data = model(noise)#输入噪音，输出G生成的数据
-        # return Model(noise, data) #返回模型
+
     #构建判别器
     def build_discriminator(self):
-        model = Sequential()
-        model.add(Flatten(input_shape=self.data_shape))#该层输出(None, )None是batch_size
-        # model.add(Flatten(input_shape=(self.data_shape,1)))#该层输出(None, )None是batch_size
-        # model.add(Conv1D(filters=32, kernel_size=3, padding='same', input_shape=(self.sequence_length, 1)))
-        # model.add(Conv1D(filters=16, kernel_size=3, strides=2, padding='same', input_shape=(self.sequence_length, 1)))
-        # model.add(LeakyReLU(alpha=0.2))
-        # model.add(Dropout(0.5))
-        # model.add(Dense(64))
-        # model.add(LeakyReLU(alpha=0.2))
-        model.add(Reshape((SEQUNENCE_LENGTH,1)))#real data的长度
-        model.add(Conv1D(filters=32, kernel_size=3, padding='same', activation='relu'))
-        model.add(Dropout(0.25))
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Flatten())
-        model.add(Dense(32, activation='relu'))
-        model.add(Dropout(0.5))
-        # model.add(Dense(1, activation='sigmoid'))
-        model.add(Dense(128, activation='relu'))
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Dense(128))#该层输出(None, 128)
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Dense(128,activation='relu'))
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Dense(n_classes))
-        # model.summary()
-        #         model.add(Conv1D(filters=32, kernel_size=3, padding='same', input_shape=(self.sequence_length, 1)))
-        #         model.add(Conv1D(filters=16, kernel_size=3, strides=2, padding='same', input_shape=(self.sequence_length, 1)))
-        #         model.add(LeakyReLU(alpha=0.2))
-        #         model.add(Dropout(0.25))
-        #         model.add(BatchNormalization(momentum=0.8))
-        #         model.add(Conv1D(filters=32, kernel_size=3, padding='same', activation='relu'))
-        #         model.add(LeakyReLU(alpha=0.2))
-        #         model.add(Dropout(0.25))
-        #         model.add(BatchNormalization(momentum=0.8))
-        #         model.add(Conv1D(filters=128, kernel_size=3, padding='same', activation='relu'))
-        #         # model.add(Conv1D(filters=64, kernel_size=3, strides=2, padding='same'))
-        #         model.add(LeakyReLU(alpha=0.2))
-        #         model.add(Dropout(0.25))
-        #         model.add(BatchNormalization(momentum=0.8))
-        #         model.add(Flatten())
-        #         model.add(Dense(32, activation='relu'))
-        #         model.add(Dropout(0.5))
-        #         model.add(Dense(1, activation='sigmoid'))
-        #         model.summary()
+        model = tf.keras.Sequential([
+            tf.keras.layers.Flatten(input_shape=self.data_shape),
+            tf.keras.layers.Reshape((SEQUNENCE_LENGTH,1)),
+            tf.keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu'),
+            tf.keras.layers.LeakyReLU(alpha=0.2),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dense(32, activation='relu'),
+            tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.LeakyReLU(alpha=0.2),
+            tf.keras.layers.Dense(128),
+            tf.keras.layers.LeakyReLU(alpha=0.2),
+            tf.keras.layers.Dense(128,activation='relu'),
+            tf.keras.layers.LeakyReLU(alpha=0.2),
+            tf.keras.layers.Dense(n_classes)
+
+        ])
         return model
-        # data = Input(shape=self.data_shape) #建立一个输入层，输入维度是数据的维度，输入数据是G生成的数据
-        # validity = model(data) # 输出数据是D的判别结果
-        # return Model(data, validity) #返回模型
 
     def discriminator_loss(self,gen_disc_output,real_disc_output): #sig_src是发射信号，signal
         """
@@ -243,62 +173,62 @@ class GAN:
 
         # loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
         #接受模型的类别概率预测结果和预期标签，然后返回样本的平均损失。
-        generated_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(gen_disc_output),
+        generated_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(gen_disc_output),
                                                                  logits= gen_disc_output)
-        real_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(real_disc_output),
+        real_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(real_disc_output),
                                                             logits=real_disc_output)
         total_disc_loss = tf.reduce_mean(real_loss)+tf.reduce_mean(generated_loss)
         return total_disc_loss
 
-    def generator_loss(self,gen_datas,real_H,rfd_weight):
+    def generator_loss(self,gen_datas,gen_disc_output,real_H,rfd_weight):
         '''
         :param gen_datas:
-        :param constructed_signal_channel_estimation: perform_omp(sig_src,constructed_rcv_signal)
+        :param real_H: perform_omp(sig_src,constructed_rcv_signal)
         :param rfd_weight:
         :return:
         '''
-        gen_datas = gen_datas.T
-        gen_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(self.discriminator.predict(gen_datas)),
-                                                            logits = self.discriminator.predict(gen_datas))
+        gen_datas = gen_datas.numpy()
+        gen_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(gen_disc_output),
+                                                            logits = gen_disc_output)
         # rfd loss
         Enhanced_impulse_response = self.OMP.perform_omp(s=sig_src,data=gen_datas)#sig_src是发射信号
         gen_rfd_loss = self.rfd.cal_RFD(data_standard=real_H,
                                      data_other=Enhanced_impulse_response,
                                      dist0=15)
-        total_gen_loss = gen_loss + rfd_weight*gen_rfd_loss
-        total_gen_loss = tf.reduce_mean(total_gen_loss)
+        total_gen_loss = gen_loss + tf.multiply(rfd_weight,gen_rfd_loss)
         return total_gen_loss
 
     def train_step(self,gen_datas,noise):
         with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
-            # gen_tape.watch(self.generator.trainable_weights)
-            # disc_tape.watch(self.discriminator.trainable_weights)
-            gen_datas = tf.convert_to_tensor(self.generator.predict(noise)) #生成器预测噪声
-            real_disc_output = tf.convert_to_tensor(self.discriminator.predict(data_ds[self.idx]))
-            gen_disc_output = tf.convert_to_tensor(self.discriminator.predict(gen_datas.numpy()))
-        start_time = datetime.datetime.now()
-        gen_loss = self.generator_loss(gen_datas=gen_datas.numpy(),
-                                       real_H=constructed_signal_channel_estimation,
-                                       rfd_weight=0.1)   # gen loss
-        elapsed_time = datetime.datetime.now() - start_time
-        print('time:',  elapsed_time)
-        disc_loss = self.discriminator_loss(gen_disc_output=gen_disc_output,
-                                            real_disc_output=real_disc_output)  # disc loss
-            # gen_loss = tf.constant(gen_loss)
-            # disc_loss = tf.constant(disc_loss)
+            gen_datas = self.generator(noise) #生成器预测噪声
+            real_disc_output = self.discriminator(data_ds[self.idx])
+            gen_disc_output = self.discriminator(gen_datas)
+            #cal loss
+            start_time = datetime.datetime.now()
+            gen_loss = self.generator_loss(gen_datas=gen_datas,
+                                           real_H=constructed_signal_channel_estimation,
+                                           rfd_weight=0.1,
+                                           gen_disc_output=gen_disc_output)   # gen loss
+            elapsed_time = datetime.datetime.now() - start_time
+            print('time of gen_loss:',  elapsed_time)
+            disc_loss = self.discriminator_loss(gen_disc_output=gen_disc_output,
+                                                real_disc_output=real_disc_output)  # disc loss
         # gradient
-        generator_gradient = gen_tape.gradient(gen_loss,self.generator.trainable_weights)
-        discriminator_gradient = disc_tape.gradient(disc_loss, self.discriminator.trainable_weights)
+        generator_gradient = gen_tape.gradient(gen_loss,self.generator.trainable_variables)
+        discriminator_gradient = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
+        # print([var.name for var in gen_tape.watched_variables()])
+        # print([var.name for var in disc_tape.watched_variables()])
+        #列出梯度带正在监视的变量，gen_tape &　disc_tape 观测的变量都是G和D的所有可训练参数的集合，计算的时候各取所需。
         # apply gradient
-        self.generator_optimizer.apply_gradients(zip(generator_gradient, self.generator.trainable_weights))
-        self.discriminator_optimizer.apply_gradients(zip(discriminator_gradient, self.discriminator.trainable_weights))
+        self.discriminator_optimizer.apply_gradients(zip(discriminator_gradient, self.discriminator.trainable_variables))
+        self.generator_optimizer.apply_gradients(zip(generator_gradient, self.generator.trainable_variables))
         return gen_loss, disc_loss
 
     def train(self,data,noise,epochs,batch_size,sample_interval):
         start_time = datetime.datetime.now()
         for epoch in range(epochs):
             self.idx = np.random.randint(0, data.shape[0], batch_size)#随机产生batch_size个索引
-            gen_datas = self.generator.predict(noise[self.idx]) #生成器预测噪声
+            gen_datas = self.generator(noise[self.idx]) #生成器预测噪声
             #data.shape[0]为数据集样本的数量，随机生成batch_size个数量的随机数，作为数据的索引
             gen_loss, disc_loss = self.train_step(gen_datas=gen_datas,noise=noise[self.idx])#计算损失,gradient,and refresh weight
             # validity= self.discriminator.predict(real_datas)#disc_real_output
@@ -309,7 +239,7 @@ class GAN:
                 print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, disc_loss[0], 100 * disc_loss[1], gen_loss),
                       'time:',  elapsed_time)
     def sample_data(self, epoch): #每100个epoch保存数据
-        gen_datas = self.generator.predict(noise[self.idx]) #生成的样本，即把随机噪声扔进去然后预测,这里需要重写,idx
+        gen_datas = self.generator(noise[self.idx]) #生成的样本，即把随机噪声扔进去然后预测,这里需要重写,idx
         file_name='./gen_data/gen_datas.mat'.format(epoch)
         sio.savemat(file_name,{'gen_datas':gen_datas})
         X1 = gen_datas

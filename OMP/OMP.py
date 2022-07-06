@@ -55,6 +55,7 @@ class OMP():
 
      def perform_omp(self,s,data):#s是发射信号，data是接收信号。
         data = np.array(data)#数据转array
+        data = data.T
         toeplitz_column = data.shape[1]-s.shape[1]+1
         # plt.plot(t,s)
         # plt.show()

@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="76e9f3dc-4820-49b5-9983-4d4d97225bcd" name="默认变更列表" comment="Merge remote-tracking branch 'origin/main' into main&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
+    <list default="true" id="76e9f3dc-4820-49b5-9983-4d4d97225bcd" name="默认变更列表" comment="update_gradient">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OMP/OMP.py" beforeDir="false" afterPath="$PROJECT_DIR$/OMP/OMP.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RFD/RFD.py" beforeDir="false" afterPath="$PROJECT_DIR$/RFD/RFD.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dcgan.py" beforeDir="false" afterPath="$PROJECT_DIR$/dcgan.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -29,6 +35,7 @@
     <setting file="file://$USER_HOME$/tf2.2/Lib/site-packages/tensorflow/python/ops/cond_v2.py" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/gen_data.py" root0="SKIP_INSPECTION" />
     <setting file="file://$USER_HOME$/tf2.2/Lib/site-packages/tensorflow/python/keras/losses.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/test.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/OMP/OMP.py" root0="SKIP_INSPECTION" />
   </component>
   <component name="ProjectId" id="2AgfgLbPMCRwi3oJJSKlL8Ay7xt" />
@@ -56,7 +63,7 @@
       <recent name="D:\Urbino\0master\0毕设\git-manager\model_ocean_sound_field_based_on_GAN\data" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.test">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="model_ocean_sound_field_based_on_GAN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -101,9 +108,29 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="model_ocean_sound_field_based_on_GAN" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="true" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.dcgan" />
+        <item itemvalue="Python.test" />
       </list>
     </recent_temporary>
   </component>
@@ -132,7 +159,14 @@
       <workItem from="1656406962433" duration="5807000" />
       <workItem from="1656551699040" duration="22883000" />
       <workItem from="1656638463558" duration="12989000" />
-      <workItem from="1656757681976" duration="196000" />
+      <workItem from="1656757681976" duration="1138000" />
+      <workItem from="1656764069468" duration="885000" />
+      <workItem from="1656825523834" duration="435000" />
+      <workItem from="1656899438578" duration="5077000" />
+      <workItem from="1656926588032" duration="1233000" />
+      <workItem from="1656983392727" duration="3835000" />
+      <workItem from="1657019472090" duration="617000" />
+      <workItem from="1657067402782" duration="20273000" />
     </task>
     <task id="LOCAL-00001" summary="v1">
       <created>1655436990376</created>
@@ -232,7 +266,14 @@
       <option name="project" value="LOCAL" />
       <updated>1655478500565</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="update_gradient">
+      <created>1656758168221</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1656758168221</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -256,20 +297,28 @@
     <MESSAGE value="Merge remote-tracking branch 'origin/main' into main&#10;&#10;# Conflicts:&#10;#&#9;.idea/model_ocean_sound_field_based_on_GAN.iml" />
     <MESSAGE value="Merge remote-tracking branch 'origin/main' into main&#10;&#10;# Conflicts:&#10;#&#9;.gitignore" />
     <MESSAGE value="Merge remote-tracking branch 'origin/main' into main&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
-    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'origin/main' into main&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
+    <MESSAGE value="update_gradient" />
+    <option name="LAST_COMMIT_MESSAGE" value="update_gradient" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/dcgan.py</url>
-          <line>292</line>
-          <option name="timeStamp" value="28" />
+          <line>221</line>
+          <option name="timeStamp" value="36" />
         </line-breakpoint>
       </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/model_ocean_sound_field_based_on_GAN$dcgan.coverage" NAME="dcgan 覆盖结果" MODIFIED="1656661910183" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/model_ocean_sound_field_based_on_GAN$dcgan.coverage" NAME="dcgan 覆盖结果" MODIFIED="1657116224845" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
