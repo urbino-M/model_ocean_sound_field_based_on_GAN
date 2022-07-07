@@ -78,7 +78,7 @@ noise = noise.T#数据是2dims
 
 #######################读取真实信道（由1s 实验cw信号估计出来的信道）#######################################
 #
-Real_impulse_response_init =  h5py.File('data/or2_c_final.mat',mode='r')
+# Real_impulse_response_init =  h5py.File('data/or2_c_final.mat',mode='r')
 # Real_impulse_response = Real_impulse_response_init['or2_c_final']
 # Real_impulse_response = np.array(Real_impulse_response,dtype=np.float32)
 # data_ds=data_ds/np.max(data_ds)#数据归一化，可以换处理方法。
