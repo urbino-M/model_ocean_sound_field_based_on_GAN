@@ -17,10 +17,10 @@ print("Eager execution: {}".format(tf.executing_eagerly()))
 print('this is the first version of my github')
 
 #设置gpu
-# print(tf.test.is_gpu_available())#测试GPU是否可用
+print(tf.test.is_gpu_available())#测试GPU是否可用
 # physical_devices = tf.config.experimental.list_physical_devices('GPU') #列出GPU的信息
 # tf.config.experimental.set_memory_growth(physical_devices[0], True)
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 # config = tf.compat.v1.ConfigProto()
 # config.gpu_options.allow_growth = True
 # tf.compat.v1.enable_eager_execution(config=config)
@@ -91,7 +91,7 @@ LATENT_DIM = 5473 #隐变量维度，即G输入的维度
 n_classes = 1 #类别个数
 EPOCHS = 10000
 BATCH_SIZE = 1 #实时训练
-
+layers = tf.keras.layers
 #%% 创建GAN
 
 class GAN:
@@ -102,7 +102,6 @@ class GAN:
         self.feature_dimentions = FEATUERE_DIMENTIONS #样本维度为1
         self.data_shape = (self.sequence_length, self.feature_dimentions)
         self.latent_dim = LATENT_DIM #噪声长度,如果用自己的数据的话需要修改。
-        # self.optimizer = Adam(0.0001, 0.5)#优化器参数lr和beta
         #########D结构#############
         self.discriminator = self.build_discriminator()
         self.discriminator_optimizer = tf.keras.optimizers.Adam(2e-4,0.5)
@@ -111,16 +110,14 @@ class GAN:
         #########G结构#############
         self.generator = self.build_generator()
         self.generator_optimizer = tf.keras.optimizers.Adam(2e-4,0.5)
-        z = tf.keras.layers.Input(shape=(self.latent_dim,)) # 定义一个输入层，输入维度是噪声的维度
-        data = self.generator(z)#给G输入噪声,data是G的输出
-        self.discriminator.trainable = True #为了组合模型（此时组合的模型是G+D只训练G）
-        self.generator.trainable = True
-        validity = self.discriminator(data) #判别器将由噪声生成的数据作为输入并确定有效性
-
+        # z = tf.keras.layers.Input(shape=(self.latent_dim,)) # 定义一个输入层，输入维度是噪声的维度
+        # data = self.generator(z)#给G输入噪声,data是G的输出
+        # self.discriminator.trainable = True #为了组合模型（此时组合的模型是G+D只训练G）
+        # self.generator.trainable = True
+        # validity = self.discriminator(data) #判别器将由噪声生成的数据作为输入并确定有效性
         #########组合模型(i.e.把D和G堆叠起来)#############
         # self.combined = Model(z,validity) #训练生成器骗过判别器
         # self.combined.compile(loss='binary_crossentropy', optimizer=self.optimizer)
-
         # self.generator.summary()#G模型参数打印
         # self.discriminator.summary()#D模型参数打印
         # self.combined.summary()#打印组合的模型参数
@@ -131,12 +128,22 @@ class GAN:
             tf.keras.layers.LeakyReLU(alpha=0.2),
             tf.keras.layers.Reshape((200,1)),
             tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            layers.BatchNormalization(),
+            layers.Dropout(0.5),
             tf.keras.layers.UpSampling1D(),
             tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            layers.BatchNormalization(),
+            layers.Dropout(0.5),
             tf.keras.layers.UpSampling1D(),
             tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            layers.BatchNormalization(),
+            layers.Dropout(0.5),
             tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            layers.BatchNormalization(),
+            layers.Dropout(0.5),
             tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            layers.BatchNormalization(),
+            layers.Dropout(0.5),
             tf.keras.layers.UpSampling1D(),
             tf.keras.layers.Conv1D(filters=6, kernel_size=8, padding="same", activation='relu'),
             tf.keras.layers.Flatten(),
@@ -151,6 +158,8 @@ class GAN:
             tf.keras.layers.Flatten(input_shape=self.data_shape),
             tf.keras.layers.Reshape((SEQUNENCE_LENGTH,1)),
             tf.keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu'),
+            layers.BatchNormalization(),
+            layers.Dropout(0.5),
             tf.keras.layers.LeakyReLU(alpha=0.2),
             tf.keras.layers.Flatten(),
             tf.keras.layers.Dense(32, activation='relu'),
@@ -180,66 +189,79 @@ class GAN:
         total_disc_loss = tf.reduce_mean(real_loss)+tf.reduce_mean(generated_loss)
         return total_disc_loss
 
-    def generator_loss(self,gen_datas,gen_disc_output,real_H,rfd_weight):
+    def generator_loss(self,gen_disc_output,real_H):
         '''
-        :param gen_datas:
         :param real_H: perform_omp(sig_src,constructed_rcv_signal)
-        :param rfd_weight:
+        :param gen_disc_output: any
         :return:
         '''
-        gen_datas = gen_datas.numpy()
+        gen_datas = self.gen_datas.numpy()
         gen_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(gen_disc_output),
                                                             logits = gen_disc_output)
+        #D的判别结果反馈给G
         # rfd loss
         Enhanced_impulse_response = self.OMP.perform_omp(s=sig_src,data=gen_datas)#sig_src是发射信号
+        file_name='./gen_data/gen_H.mat'
+        sio.savemat(file_name,{'gen_H':Enhanced_impulse_response}) #保存生成的H
         gen_rfd_loss = self.rfd.cal_RFD(data_standard=real_H,
                                      data_other=Enhanced_impulse_response,
-                                     dist0=15)
-        total_gen_loss = tf.reduce_mean(gen_loss) + tf.reduce_mean(tf.multiply(rfd_weight,gen_rfd_loss))
+                                     dist0=self.dist0)
+        total_gen_loss = gen_loss + self.rfd_weight*gen_rfd_loss
+        total_gen_loss = tf.convert_to_tensor(total_gen_loss)
         return total_gen_loss
 
-    def train_step(self,gen_datas,noise):
+    def train_step(self,noise):
         with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
-            gen_datas = self.generator(noise) #生成器预测噪声
+            self.gen_datas = self.generator(noise) #生成器预测噪声
             real_disc_output = self.discriminator(data_ds[self.idx])
-            gen_disc_output = self.discriminator(gen_datas)
+            gen_disc_output = self.discriminator(self.gen_datas)
             #cal loss
+            disc_loss = self.discriminator_loss(gen_disc_output=gen_disc_output,
+                                                real_disc_output=real_disc_output)  # disc loss
             start_time = datetime.datetime.now()
-            gen_loss = self.generator_loss(gen_datas=gen_datas,
+            gen_loss = self.generator_loss(
                                            real_H=constructed_signal_channel_estimation,
-                                           rfd_weight=0.1,
                                            gen_disc_output=gen_disc_output)   # gen loss
             elapsed_time = datetime.datetime.now() - start_time
             print('time of gen_loss:',  elapsed_time)
-            disc_loss = self.discriminator_loss(gen_disc_output=gen_disc_output,
-                                                real_disc_output=real_disc_output)  # disc loss
-        # gradient
-        generator_gradient = gen_tape.gradient(gen_loss,self.generator.trainable_variables)
+        # cal gradient
         discriminator_gradient = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
+        generator_gradient = gen_tape.gradient(gen_loss,self.generator.trainable_variables)
         # print([var.name for var in gen_tape.watched_variables()])
         # print([var.name for var in disc_tape.watched_variables()])
         #列出梯度带正在监视的变量，gen_tape &　disc_tape 观测的变量都是G和D的所有可训练参数的集合，计算的时候各取所需。
         # apply gradient
         self.discriminator_optimizer.apply_gradients(zip(discriminator_gradient, self.discriminator.trainable_variables))
+        #训练D
         self.generator_optimizer.apply_gradients(zip(generator_gradient, self.generator.trainable_variables))
+        #训练G
         return gen_loss, disc_loss
 
-    def train(self,data,noise,epochs,batch_size,sample_interval):
+    def train(self,data,noise,epochs,batch_size,sample_interval,dist0,rfd_weight):
+        '''
+        :param data: real rcv signal
+        :param noise: the input of G
+        :param epochs: epochs
+        :param batch_size: batch_size
+        :param sample_interval: the interval of sampling
+        :param dist0: rfd distance
+        :param rfd_weight: the weight of gen_loss
+        :return:
+        '''
+        self.dist0 = dist0
+        self.rfd_weight = rfd_weight
         start_time = datetime.datetime.now()
         for epoch in range(epochs):
             self.idx = np.random.randint(0, data.shape[0], batch_size)#随机产生batch_size个索引
-            gen_datas = self.generator(noise[self.idx]) #生成器预测噪声
-            #data.shape[0]为数据集样本的数量，随机生成batch_size个数量的随机数，作为数据的索引
-            gen_loss, disc_loss = self.train_step(gen_datas=gen_datas,noise=noise[self.idx])#计算损失,gradient,and refresh weight
-            # validity= self.discriminator.predict(real_datas)#disc_real_output
-            # disc_generated_output = self.discriminator.predict(gen_datas)
+            gen_loss, disc_loss = self.train_step(noise=noise[self.idx])
+            #计算损失,gradient,and refresh weight
             elapsed_time = datetime.datetime.now() - start_time
-            if epoch % sample_interval == 0: #相除取余 (每一百个epoch打印一次verbose)
-                self.X1 = self.sample_data(epoch,gen_datas=gen_datas)
+            if epoch % sample_interval == 0: #相除取余 (每sample_interval个epoch打印一次verbose)
+                self.X1 = self.sample_data(epoch,gen_datas=self.gen_datas)
                 print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, disc_loss.numpy(), 100 * disc_loss.numpy(), gen_loss.numpy()),
                       'time:',  elapsed_time)
-    def sample_data(self, epoch,gen_datas): #每100个epoch保存数据
-        # gen_datas = self.generator(noise[self.idx]) #生成的样本，即把随机噪声扔进去然后预测,这里需要重写,idx
+    def sample_data(self, epoch,gen_datas):
+        gen_datas = self.gen_datas.numpy()
         file_name='./gen_data/gen_datas.mat'.format(epoch)
         sio.savemat(file_name,{'gen_datas':gen_datas})
         X1 = gen_datas
@@ -248,7 +270,7 @@ class GAN:
 
 #%%
 gan=GAN() #类实例化
-gan.train(data_ds,epochs=EPOCHS,batch_size=BATCH_SIZE,sample_interval=2,noise=noise) #采样间隔100，数据集这里需要修改
+gan.train(data_ds,epochs=200,batch_size=1,sample_interval=2,noise=noise,dist0=20,rfd_weight=10)
 #%%
 # for i in range(25):
 #     gan.sample_data(i+1)
