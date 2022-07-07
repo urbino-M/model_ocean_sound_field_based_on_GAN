@@ -66,6 +66,7 @@ class RFD():
             fenzi = np.sum(abs(np.square(data_other[0,index_all])))
             fenmu = np.sum(abs(np.square(data_standard[0,index_all])))
             rfd_1=fenzi/fenmu
+            deta1 = abs(rfd_1 - 1)
             if rfd_1<threshold1:
                 deta1 = abs(rfd_1-1)
                 break

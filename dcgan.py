@@ -195,7 +195,7 @@ class GAN:
         gen_rfd_loss = self.rfd.cal_RFD(data_standard=real_H,
                                      data_other=Enhanced_impulse_response,
                                      dist0=15)
-        total_gen_loss = gen_loss + tf.multiply(rfd_weight,gen_rfd_loss)
+        total_gen_loss = tf.reduce_mean(gen_loss) + tf.reduce_mean(tf.multiply(rfd_weight,gen_rfd_loss))
         return total_gen_loss
 
     def train_step(self,gen_datas,noise):
@@ -235,11 +235,11 @@ class GAN:
             # disc_generated_output = self.discriminator.predict(gen_datas)
             elapsed_time = datetime.datetime.now() - start_time
             if epoch % sample_interval == 0: #相除取余 (每一百个epoch打印一次verbose)
-                self.X1 = self.sample_data(epoch)
-                print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, disc_loss[0], 100 * disc_loss[1], gen_loss),
+                self.X1 = self.sample_data(epoch,gen_datas=gen_datas)
+                print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, disc_loss.numpy(), 100 * disc_loss.numpy(), gen_loss.numpy()),
                       'time:',  elapsed_time)
-    def sample_data(self, epoch): #每100个epoch保存数据
-        gen_datas = self.generator(noise[self.idx]) #生成的样本，即把随机噪声扔进去然后预测,这里需要重写,idx
+    def sample_data(self, epoch,gen_datas): #每100个epoch保存数据
+        # gen_datas = self.generator(noise[self.idx]) #生成的样本，即把随机噪声扔进去然后预测,这里需要重写,idx
         file_name='./gen_data/gen_datas.mat'.format(epoch)
         sio.savemat(file_name,{'gen_datas':gen_datas})
         X1 = gen_datas
@@ -248,7 +248,7 @@ class GAN:
 
 #%%
 gan=GAN() #类实例化
-gan.train(data_ds,epochs=EPOCHS,batch_size=BATCH_SIZE,sample_interval=100,noise=noise) #采样间隔100，数据集这里需要修改
+gan.train(data_ds,epochs=EPOCHS,batch_size=BATCH_SIZE,sample_interval=2,noise=noise) #采样间隔100，数据集这里需要修改
 #%%
 # for i in range(25):
 #     gan.sample_data(i+1)
