@@ -2,7 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="76e9f3dc-4820-49b5-9983-4d4d97225bcd" name="默认变更列表" comment="Merge remote-tracking branch 'origin/main' into main&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/model_ocean_sound_field_based_on_GAN.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/model_ocean_sound_field_based_on_GAN.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/_2022_6_17_16_51____.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/_2022_6_17_16_51____.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RFD/RFD.py" beforeDir="false" afterPath="$PROJECT_DIR$/RFD/RFD.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dcgan.h5" beforeDir="false" afterPath="$PROJECT_DIR$/dcgan.h5" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dcgan.py" beforeDir="false" afterPath="$PROJECT_DIR$/dcgan.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -30,9 +36,13 @@
     </file-type-list>
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/dcgan.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$USER_HOME$/tf2.2/Lib/site-packages/tensorflow/python/ops/cond_v2.py" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/gen_data.py" root0="SKIP_INSPECTION" />
-    <setting file="file://$PROJECT_DIR$/OMP/OMP.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$USER_HOME$/tf2.2/Lib/site-packages/tensorflow/python/keras/losses.py" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/RFD/RFD.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/test.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/OMP/OMP.py" root0="SKIP_INSPECTION" />
   </component>
   <component name="ProjectId" id="2AgfgLbPMCRwi3oJJSKlL8Ay7xt" />
   <component name="ProjectLevelVcsManager">
@@ -60,7 +70,7 @@
       <recent name="D:\Urbino\0master\0毕设\git-manager\model_ocean_sound_field_based_on_GAN\data" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.test">
+  <component name="RunManager" selected="Python.dcgan">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="model_ocean_sound_field_based_on_GAN" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -172,6 +182,8 @@
       <workItem from="1657019472090" duration="617000" />
       <workItem from="1657067402782" duration="20273000" />
       <workItem from="1657197727732" duration="1967000" />
+      <workItem from="1657349506014" duration="3640000" />
+      <workItem from="1657497418805" duration="38500000" />
     </task>
     <task id="LOCAL-00001" summary="v1">
       <created>1655436990376</created>
@@ -307,6 +319,28 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dcgan.py</url>
+          <line>87</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dcgan.py</url>
+          <line>43</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dcgan.py</url>
+          <line>69</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/dcgan.py</url>
+          <line>211</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+      </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
           <properties notifyOnTerminate="true" exception="BaseException">
@@ -317,6 +351,6 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/model_ocean_sound_field_based_on_GAN$dcgan.coverage" NAME="dcgan 覆盖结果" MODIFIED="1657169536865" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/model_ocean_sound_field_based_on_GAN$dcgan.coverage" NAME="dcgan 覆盖结果" MODIFIED="1657856511329" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

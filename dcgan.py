@@ -5,11 +5,7 @@ import h5py
 import numpy as np
 import scipy.io as sio
 import tensorflow as tf
-# from keras.layers import BatchNormalization
-# from keras.layers import Input, Dense, Reshape, Flatten, Dropout
-# from keras.layers.advanced_activations import LeakyReLU
-# from keras.layers.convolutional import UpSampling1D, Conv1D
-# from keras.models import Sequential, Model
+# import hdf5storage
 from OMP.OMP import OMP
 from RFD.RFD import RFD  # 导入局部聚焦误差函数
 print(tf.__version__)
@@ -42,20 +38,22 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 # data_ds=[np.loadtxt(item) for item in all_data_path] #导入上述字符串所对应的txt or mat or sth
 
 #######################读取构造的0.1s发射信号(无论是仿真还是真实的信道用的都是这个发射信号)#######################################
-sig_src_init = h5py.File('data/sig_src2.mat',mode='r')
-sig_src = sig_src_init['sig_src2']
+sig_src_init = h5py.File('data/sig_src_nor.mat',mode='r')
+sig_src = sig_src_init['sig_src_nor']
 sig_src = np.array(sig_src,dtype=np.float32)
 sig_src = sig_src.T
+
 # sig_src = sig_src.reshape(sig_src.shape[0],sig_src.shape[1],1)
 
 ####################### 读取构造的0.1s接收信号（发射信号经过真实信道后加4-8dB的高斯白噪声扩充）*600 #############################
-
-data_init = h5py.File('data/enhance_true_sig2_2_real.mat',mode='r')
-data_ds = data_init['enhance_true_sig2_2_real']
-# print(data_init.values())
+# data_init = sio.loadmat('data/enhance_true_sig2_nor.mat')
+# data_ds= data_init['enhance_true_sig2_nor']
+data_init = h5py.File('data/enhance_true_sig2_2_real_nor1111.mat',mode='r')
+data_ds = data_init['enhance_true_sig2_2_real_nor1111']
+# # print(data_init.values())
 data_ds = np.array(data_ds,dtype=np.float32) #将这些数据转化成nparray
 data_ds = data_ds.T#数据转置(非共轭转置)
-data_ds = data_ds.reshape(data_ds.shape[0],data_ds.shape[1],1) #reshape数据维度，变成三维的数据
+# data_ds = data_ds.reshape(data_ds.shape[0],data_ds.shape[1]) #reshape数据维度，变成三维的数据
 
 #######################读取（0.1s扩充的接收信号通过与omp的信道估计） 600 #######################################
 constructed_signal_channel_estimation_init =  h5py.File('data/gouzao520_c_final.mat',mode='r')
@@ -64,8 +62,10 @@ constructed_signal_channel_estimation = np.array(constructed_signal_channel_esti
 constructed_signal_channel_estimation = constructed_signal_channel_estimation.T#数据是2dims
 
 ####################### 读取（仿真信道接收信号）*600，给G的输入#######################################
-noise_init = h5py.File('data/Sig_Sim.mat',mode='r')
-noise = noise_init['Sig_Sim']
+# noise_init = sio.loadmat('data/Sig_Sim_nor1.mat')
+# noise= noise_init['Sig_Sim_nor1']
+noise_init = h5py.File('data/Sig_Sim_nor1.mat',mode='r')
+noise = noise_init['Sig_Sim_nor1']
 noise = np.array(noise,dtype=np.float32)
 noise = noise.T#数据是2dims
 # noise = noise.reshape(noise.shape[0],noise.shape[1],1)
@@ -128,24 +128,32 @@ class GAN:
             tf.keras.layers.LeakyReLU(alpha=0.2),
             tf.keras.layers.Reshape((200,1)),
             tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            tf.keras.layers.LeakyReLU(alpha=0.2),
             layers.BatchNormalization(),
             layers.Dropout(0.5),
             tf.keras.layers.UpSampling1D(),
             tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            tf.keras.layers.LeakyReLU(alpha=0.2),
             layers.BatchNormalization(),
             layers.Dropout(0.5),
             tf.keras.layers.UpSampling1D(),
             tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            tf.keras.layers.LeakyReLU(alpha=0.2),
             layers.BatchNormalization(),
             layers.Dropout(0.5),
-            tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
-            layers.BatchNormalization(),
-            layers.Dropout(0.5),
-            tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
-            layers.BatchNormalization(),
-            layers.Dropout(0.5),
+            # tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            # tf.keras.layers.LeakyReLU(alpha=0.2),
+            # layers.BatchNormalization(),
+            # layers.Dropout(0.5),
+            # tf.keras.layers.Conv1D(filters=64, kernel_size=8, padding="same", activation='relu'),
+            # tf.keras.layers.LeakyReLU(alpha=0.2),
+            # layers.BatchNormalization(),
+            # layers.Dropout(0.5),
             tf.keras.layers.UpSampling1D(),
             tf.keras.layers.Conv1D(filters=6, kernel_size=8, padding="same", activation='relu'),
+            tf.keras.layers.LeakyReLU(alpha=0.2),
+            layers.BatchNormalization(),
+            layers.Dropout(0.5),
             tf.keras.layers.Flatten(),
             tf.keras.layers.Reshape((SEQUNENCE_LENGTH,1))
 
@@ -158,6 +166,7 @@ class GAN:
             tf.keras.layers.Flatten(input_shape=self.data_shape),
             tf.keras.layers.Reshape((SEQUNENCE_LENGTH,1)),
             tf.keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu'),
+            tf.keras.layers.LeakyReLU(alpha=0.2),
             layers.BatchNormalization(),
             layers.Dropout(0.5),
             tf.keras.layers.LeakyReLU(alpha=0.2),
@@ -165,28 +174,27 @@ class GAN:
             tf.keras.layers.Dense(32, activation='relu'),
             tf.keras.layers.Dense(128, activation='relu'),
             tf.keras.layers.LeakyReLU(alpha=0.2),
-            tf.keras.layers.Dense(128),
-            tf.keras.layers.LeakyReLU(alpha=0.2),
-            tf.keras.layers.Dense(128,activation='relu'),
-            tf.keras.layers.LeakyReLU(alpha=0.2),
+            # tf.keras.layers.Dense(128),
+            # tf.keras.layers.LeakyReLU(alpha=0.2),
+            # tf.keras.layers.Dense(128,activation='relu'),
+            # tf.keras.layers.LeakyReLU(alpha=0.2),
             tf.keras.layers.Dense(n_classes)
 
         ])
         return model
 
     def discriminator_loss(self,gen_disc_output,real_disc_output): #sig_src是发射信号，signal
-        """
-        real_datas is real recieved signal i.e. data_ds
-        """
-        # real_datas = real_datas.reshape(real_datas.shape[0],real_datas.shape[1],1)
+        '''
 
-        # loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-        #接受模型的类别概率预测结果和预期标签，然后返回样本的平均损失。
-        generated_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(gen_disc_output),
+        :param gen_disc_output:
+        :param real_disc_output:
+        :return:
+        '''
+        d_fake_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.zeros_like(gen_disc_output),
                                                                  logits= gen_disc_output)
-        real_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(real_disc_output),
+        d_real_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones_like(real_disc_output),
                                                             logits=real_disc_output)
-        total_disc_loss = tf.reduce_mean(real_loss)+tf.reduce_mean(generated_loss)
+        total_disc_loss = tf.reduce_mean(d_real_loss)+tf.reduce_mean(d_fake_loss)
         return total_disc_loss
 
     def generator_loss(self,gen_disc_output,real_H):
@@ -200,30 +208,27 @@ class GAN:
                                                             logits = gen_disc_output)
         #D的判别结果反馈给G
         # rfd loss
-        Enhanced_impulse_response = self.OMP.perform_omp(s=sig_src,data=gen_datas)#sig_src是发射信号
-        file_name='./gen_data/gen_H.mat'
-        sio.savemat(file_name,{'gen_H':Enhanced_impulse_response}) #保存生成的H
-        gen_rfd_loss = self.rfd.cal_RFD(data_standard=real_H,
-                                     data_other=Enhanced_impulse_response,
+        self.Enhanced_impulse_response = self.OMP.perform_omp(s=sig_src,data=gen_datas)#sig_src是发射信号
+        gen_rfd_loss = self.rfd.cal_RFD(data_standard=real_H[self.idx],
+                                     data_other=self.Enhanced_impulse_response[0:(constructed_signal_channel_estimation.shape[1])],
                                      dist0=self.dist0)
         total_gen_loss = gen_loss + self.rfd_weight*gen_rfd_loss
         total_gen_loss = tf.convert_to_tensor(total_gen_loss)
         return total_gen_loss
 
-    def train_step(self,noise):
+    def train_step(self,noise,data_real):
         with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
             self.gen_datas = self.generator(noise) #生成器预测噪声
-            real_disc_output = self.discriminator(data_ds[self.idx])
+            real_disc_output = self.discriminator(data_real)
             gen_disc_output = self.discriminator(self.gen_datas)
             #cal loss
             disc_loss = self.discriminator_loss(gen_disc_output=gen_disc_output,
                                                 real_disc_output=real_disc_output)  # disc loss
             start_time = datetime.datetime.now()
-            gen_loss = self.generator_loss(
-                                           real_H=constructed_signal_channel_estimation,
+            gen_loss = self.generator_loss(real_H=constructed_signal_channel_estimation,
                                            gen_disc_output=gen_disc_output)   # gen loss
             elapsed_time = datetime.datetime.now() - start_time
-            print('time of gen_loss:',  elapsed_time)
+            print('Time of gen_loss:',  elapsed_time)
         # cal gradient
         discriminator_gradient = disc_tape.gradient(disc_loss, self.discriminator.trainable_variables)
         generator_gradient = gen_tape.gradient(gen_loss,self.generator.trainable_variables)
@@ -250,32 +255,48 @@ class GAN:
         '''
         self.dist0 = dist0
         self.rfd_weight = rfd_weight
-        start_time = datetime.datetime.now()
         for epoch in range(epochs):
-            self.idx = np.random.randint(0, data.shape[0], batch_size)#随机产生batch_size个索引
-            gen_loss, disc_loss = self.train_step(noise=noise[self.idx])
-            #计算损失,gradient,and refresh weight
-            elapsed_time = datetime.datetime.now() - start_time
-            if epoch % sample_interval == 0: #相除取余 (每sample_interval个epoch打印一次verbose)
-                self.X1 = self.sample_data(epoch,gen_datas=self.gen_datas)
-                print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, disc_loss.numpy(), 100 * disc_loss.numpy(), gen_loss.numpy()),
-                      'time:',  elapsed_time)
+            for (self.idx,data_real) in enumerate(data):
+                # self.idx = np.random.randint(0, data.shape[0], batch_size)#随机产生batch_size个索引
+                data_real = data_real.reshape(BATCH_SIZE,SEQUNENCE_LENGTH,1)
+                start_time = datetime.datetime.now()
+                gen_loss, disc_loss = self.train_step(noise=noise[self.idx].reshape(1,self.latent_dim),data_real=data_real)
+                #计算损失,gradient,and refresh weight
+                elapsed_time = datetime.datetime.now() - start_time
+                if self.idx % sample_interval == 0: #相除取余 (每sample_interval个iteration打印一次verbose,保存一次数据)
+                    self.sample_data(epoch,gen_datas=self.gen_datas)
+                    # print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, disc_loss.numpy(), 100 * disc_loss.numpy(), gen_loss.numpy()),
+                    #       'time:',  elapsed_time)
+                    print("[epoch:%d/iteration:%d] [D loss: %f] [G loss: %f] " % (epoch,self.idx, disc_loss.numpy(), gen_loss.numpy()),
+                          'time:',  elapsed_time)
     def sample_data(self, epoch,gen_datas):
         gen_datas = self.gen_datas.numpy()
-        file_name='./gen_data/gen_datas.mat'.format(epoch)
+        file_name='./gen_data/gen_datas.mat'
         sio.savemat(file_name,{'gen_datas':gen_datas})
-        X1 = gen_datas
-        return X1
+        # sio.savemat(file_name,{'gen_datas_{}_{}'.format(epoch+1,int(self.idx)):gen_datas})
+        H_file_name='./gen_data/gen_H.mat'
+        # sio.savemat(H_file_name,{'gen_H_{}_{}'.format(epoch+1,int(self.idx)):
+        #                              self.Enhanced_impulse_response[0:(constructed_signal_channel_estimation.shape[1]+1)]})
+        sio.savemat(H_file_name,{'gen_H':self.Enhanced_impulse_response[0:(constructed_signal_channel_estimation.shape[1])]})
+        # matgendatafile = {} # make a dictionary to store the MAT data in
+        # matgendatafile[u'gen_H_{}_{}'.format(epoch,int(self.idx))] = gen_datas
+        # hdf5storage.write(matgendatafile, '.', 'gen_data/gen_datas.mat', matlab_compatible=True)
+        # matgenHfile = {} # make a dictionary to store the MAT data in
+        # matgenHfile[u'gen_datas_{}_{}'.format(epoch,int(self.idx))] = self.Enhanced_impulse_response
+        # *** u prefix for variable name = unicode format, no issues thru Python 3.5; advise keeping u prefix indicator format based on feedback despite docs ***
+        # hdf5storage.write(matgendatafile, '.', 'gen_data/gen_H.mat', matlab_compatible=True)
+        X1,X2 = gen_datas,self.Enhanced_impulse_response[0:(constructed_signal_channel_estimation.shape[1])]
+        return X1,X2
 
 
 #%%
 gan=GAN() #类实例化
-gan.train(data_ds,epochs=200,batch_size=1,sample_interval=2,noise=noise,dist0=20,rfd_weight=10)
+gan.train(data_ds,epochs=100,batch_size=1,sample_interval=2,noise=noise,dist0=15,rfd_weight=20)
 #%%
 # for i in range(25):
 #     gan.sample_data(i+1)
 #%% 保存最后的G模型
-# gan.generator.save('./dcgan.h5')
+gan.generator.save('./dcgan.h5')
 #%%
 
 

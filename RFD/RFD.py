@@ -13,10 +13,11 @@ import h5py
 class RFD():
     def cal_RFD(self,data_standard,data_other,dist0):#cal_RFD(self,data_standard,data_other,dist0)
         index_all = []
-        self.data_standard = np.array(data_standard)
+        data_standard = np.array(data_standard)
+        data_standard = np.expand_dims(data_standard,0)
         data_other = np.array(data_other)
         data_other = data_other.T
-        self.index2 = np.nonzero(self.data_standard)[1]
+        self.index2 = np.nonzero(data_standard)[1]
         for i in range(self.index2.shape[0]):
             left_boundary = self.index2[i]-dist0
             right_boundary = self.index2[i]+dist0
@@ -36,13 +37,13 @@ class RFD():
         rfd=fenzi/fenmu
         print('this is the first rfd: '+str(rfd))
 
-        #%% rfd 结果超过最大阈值进行间距调整
+        # #%% rfd 结果超过最大阈值进行间距调整
         deta = abs(rfd-1)
         threshold1,threshold2=1.05,0.95 #设定允许接受的阈值范围
-        num_max=5 #间距最大浮动数值
+        num_max=1 #间距最大浮动数值
         flag1 = 0
         num1 = 0
-        dist0 = 15
+        dist0 = dist0
         while rfd > threshold1:
             flag1 = 1
             dist = dist0-1
@@ -74,7 +75,7 @@ class RFD():
         #%%　rfd 结果小于最小阈值进行间距调整
         flag2 = 0
         num2 = 0
-        dist0 = 15
+        dist0 = dist0
         if flag1==0:
             while rfd < threshold2:
                 flag2 = 1
